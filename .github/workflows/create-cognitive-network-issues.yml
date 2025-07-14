@@ -1,0 +1,44 @@
+---
+name: Create Cognitive Network Issues
+
+"on":
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'Which phase to create issues for (all, 1, 2, 3, 4, 5, 6)'
+        required: false
+        default: 'all'
+      dry_run:
+        description: 'Dry run mode (true/false)'
+        required: false
+        default: 'false'
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check Node.js version
+        run: node --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Cognitive Network Issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PHASE: ${{ github.event.inputs.phase }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          node .github/scripts/create-cognitive-issues.js
