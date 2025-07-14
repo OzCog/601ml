@@ -3,6 +3,7 @@ export { AtomSpace } from './atomspace';
 export { SchemeAdapter } from './scheme-adapter';
 export { AgenticTranslator } from './translators';
 export { TensorFragmentProcessor, TensorFragmentUtils } from './tensor-fragments';
+export { HypergraphVisualizer, VisualizationUtils } from './visualization';
 
 // Type definitions
 export type {
@@ -29,6 +30,15 @@ export type {
   TensorPerformanceMetrics,
 } from './types';
 
+// Visualization types
+export type {
+  VisualNode,
+  VisualEdge,
+  HypergraphVisualization,
+  FlowchartFormat,
+  VisualizationConfig,
+} from './visualization';
+
 // Enum exports
 export { AtomType } from './types';
 
@@ -37,18 +47,21 @@ import { AtomSpace } from './atomspace';
 import { SchemeAdapter } from './scheme-adapter';
 import { AgenticTranslator } from './translators';
 import { TensorFragmentProcessor } from './tensor-fragments';
+import { HypergraphVisualizer } from './visualization';
 
 export const createCognitiveSystem = () => {
   const atomSpace = new AtomSpace();
   const schemeAdapter = new SchemeAdapter(atomSpace);
   const agenticTranslator = new AgenticTranslator(atomSpace);
   const tensorProcessor = new TensorFragmentProcessor();
+  const visualizer = new HypergraphVisualizer();
 
   return {
     atomSpace,
     schemeAdapter,
     agenticTranslator,
     tensorProcessor,
+    visualizer,
   };
 };
 
