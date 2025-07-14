@@ -45,7 +45,11 @@ export class TensorFragmentProcessor {
       const validationResult = this.validateTensorShape(shape);
 
       if (!validationResult.success) {
-        return validationResult;
+        return {
+          success: false,
+          error: validationResult.error,
+          validationErrors: validationResult.validationErrors,
+        };
       }
 
       // Calculate total size

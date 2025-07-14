@@ -451,5 +451,81 @@ This Phase 1.1 implementation provides the foundation for:
 | `AtomSpace` | Hypergraph storage | `createNode()`, `createLink()`, `getAtom()`, `findAtoms()` |
 | `SchemeAdapter` | Scheme ↔ AtomSpace | `parseScheme()`, `schemeToAtoms()`, `atomsToScheme()` |
 | `AgenticTranslator` | Agentic ↔ Hypergraph | `agenticToHypergraph()`, `hypergraphToAgentic()`, `roundTripTest()` |
+| `HypergraphVisualizer` | Visualization | `visualizeAtoms()`, `visualizeAgenticPrimitive()`, `exportFlowchart()` |
+
+## Hypergraph Visualization (Phase 1.2 Complete)
+
+The visualization system provides comprehensive flowchart generation for cognitive primitives:
+
+### Basic Visualization
+
+```typescript
+import { HypergraphVisualizer } from './app/lib/cognitive';
+
+const visualizer = new HypergraphVisualizer();
+
+// Visualize atoms
+const visualization = visualizer.visualizeAtoms(atoms, 'My Cognitive System');
+
+// Export as Mermaid flowchart
+const mermaid = visualizer.exportFlowchart(visualization, 'mermaid');
+console.log(mermaid);
+
+// Export as DOT for Graphviz
+const dot = visualizer.exportFlowchart(visualization, 'dot');
+```
+
+### Agentic Primitive Visualization
+
+```typescript
+const primitive: AgenticPrimitive = {
+  action: 'navigate',
+  parameters: { destination: 'kitchen', speed: 'fast' },
+  context: {
+    agent: 'robot-1',
+    goal: 'help-user',
+    constraints: ['safe-operation'],
+    resources: ['sensors', 'actuators']
+  }
+};
+
+const agenticViz = visualizer.visualizeAgenticPrimitive(primitive);
+const flowchart = visualizer.exportFlowchart(agenticViz, 'mermaid');
+```
+
+### Tensor Fragment Visualization
+
+```typescript
+import { TensorFragmentUtils } from './app/lib/cognitive';
+
+const shape = TensorFragmentUtils.createShape(3, 5, 100, 80, 15);
+const tensorFragment = atomSpace.createTensorFragment(shape);
+const tensorViz = visualizer.visualizeTensorFragment(tensorFragment!);
+
+// Visualize tensor dimensions and prime factorization
+const diagram = visualizer.exportFlowchart(tensorViz, 'mermaid');
+```
+
+### System Reports
+
+```typescript
+import { VisualizationUtils } from './app/lib/cognitive';
+
+// Generate comprehensive system report
+const report = VisualizationUtils.generateSystemReport(atoms, tensorFragments);
+console.log(report); // Markdown report with embedded Mermaid diagrams
+
+// Generate cognitive architecture overview
+const flowDiagram = VisualizationUtils.createCognitiveFlowDiagram();
+```
+
+### Export Formats
+
+- **Mermaid**: For documentation and GitHub README files
+- **DOT**: For Graphviz rendering  
+- **JSON**: For programmatic processing
+- **SVG Description**: For custom SVG generation
+
+See [VISUALIZATION_EXAMPLES.md](./VISUALIZATION_EXAMPLES.md) for comprehensive examples and use cases.
 
 For detailed method signatures and options, refer to the TypeScript type definitions in the source code.
