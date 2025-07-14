@@ -12,7 +12,7 @@ import type {
   SchemeExpression,
   TranslationResult,
   RoundTripTest,
-  LossMetrics
+  LossMetrics,
 } from './types';
 import { AtomType } from './types';
 import { AtomSpace } from './atomspace';
@@ -35,11 +35,10 @@ export class AgenticTranslator {
       const atoms: Atom[] = [];
 
       // Create action node
-      const actionNode = this.atomSpace.createNode(
-        AtomType.PREDICATE_NODE,
-        primitive.action,
-        { strength: 1.0, confidence: 0.9 }
-      );
+      const actionNode = this.atomSpace.createNode(AtomType.PREDICATE_NODE, primitive.action, {
+        strength: 1.0,
+        confidence: 0.9,
+      });
       atoms.push(actionNode);
 
       // Create parameter nodes and links
@@ -48,40 +47,31 @@ export class AgenticTranslator {
 
       // Create context structure if present
       let contextAtoms: Atom[] = [];
+
       if (primitive.context) {
         contextAtoms = this.createContextStructure(primitive.context);
         atoms.push(...contextAtoms);
       }
 
       // Create main evaluation link
-      const parameterListLink = this.atomSpace.createLink(
-        AtomType.LIST_LINK,
-        parameterAtoms
-      );
+      const parameterListLink = this.atomSpace.createLink(AtomType.LIST_LINK, parameterAtoms);
       atoms.push(parameterListLink);
 
-      const evaluationLink = this.atomSpace.createLink(
-        AtomType.EVALUATION_LINK,
-        [actionNode, parameterListLink],
-        { strength: 1.0, confidence: 0.9 }
-      );
+      const evaluationLink = this.atomSpace.createLink(AtomType.EVALUATION_LINK, [actionNode, parameterListLink], {
+        strength: 1.0,
+        confidence: 0.9,
+      });
       atoms.push(evaluationLink);
 
       // Link context if present
       if (contextAtoms.length > 0) {
-        const contextListLink = this.atomSpace.createLink(
-          AtomType.LIST_LINK,
-          contextAtoms
-        );
+        const contextListLink = this.atomSpace.createLink(AtomType.LIST_LINK, contextAtoms);
         atoms.push(contextListLink);
 
-        const contextEvaluationLink = this.atomSpace.createLink(
-          AtomType.EVALUATION_LINK,
-          [
-            this.atomSpace.createNode(AtomType.PREDICATE_NODE, 'has-context'),
-            this.atomSpace.createLink(AtomType.LIST_LINK, [evaluationLink, contextListLink])
-          ]
-        );
+        const contextEvaluationLink = this.atomSpace.createLink(AtomType.EVALUATION_LINK, [
+          this.atomSpace.createNode(AtomType.PREDICATE_NODE, 'has-context'),
+          this.atomSpace.createLink(AtomType.LIST_LINK, [evaluationLink, contextListLink]),
+        ]);
         atoms.push(contextEvaluationLink);
       }
 
@@ -91,13 +81,13 @@ export class AgenticTranslator {
         metadata: {
           atomCount: atoms.length,
           hasContext: !!primitive.context,
-          parameterCount: Object.keys(primitive.parameters).length
-        }
+          parameterCount: Object.keys(primitive.parameters).length,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown translation error'
+        error: error instanceof Error ? error.message : 'Unknown translation error',
       };
     }
   }
@@ -108,8 +98,8 @@ export class AgenticTranslator {
   hypergraphToAgentic(atoms: Atom[]): TranslationResult<AgenticPrimitive> {
     try {
       // Find the main evaluation link
-      const evaluationLinks = atoms.filter(atom => 
-        'outgoing' in atom && atom.type === AtomType.EVALUATION_LINK
+      const evaluationLinks = atoms.filter(
+        (atom) => 'outgoing' in atom && atom.type === AtomType.EVALUATION_LINK,
       ) as Link[];
 
       if (evaluationLinks.length === 0) {
@@ -117,7 +107,7 @@ export class AgenticTranslator {
       }
 
       // Find the primary action evaluation (not context)
-      const actionEvaluation = evaluationLinks.find(link => {
+      const actionEvaluation = evaluationLinks.find((link) => {
         const predicate = link.outgoing[0];
         return predicate.name !== 'has-context';
       });
@@ -136,7 +126,7 @@ export class AgenticTranslator {
 
       // Extract context if present
       let context: AgenticContext | undefined;
-      const contextEvaluation = evaluationLinks.find(link => {
+      const contextEvaluation = evaluationLinks.find((link) => {
         const predicate = link.outgoing[0];
         return predicate.name === 'has-context';
       });
@@ -151,8 +141,8 @@ export class AgenticTranslator {
         context,
         metadata: {
           reconstructedFrom: 'hypergraph',
-          sourceAtomCount: atoms.length
-        }
+          sourceAtomCount: atoms.length,
+        },
       };
 
       return {
@@ -160,13 +150,13 @@ export class AgenticTranslator {
         result: primitive,
         metadata: {
           sourceAtomCount: atoms.length,
-          hasContext: !!context
-        }
+          hasContext: !!context,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown extraction error'
+        error: error instanceof Error ? error.message : 'Unknown extraction error',
       };
     }
   }
@@ -181,7 +171,7 @@ export class AgenticTranslator {
       }
 
       const [actionExpr, ...paramExprs] = expression.children;
-      
+
       if (actionExpr.type !== 'symbol') {
         throw new Error('First element must be an action symbol');
       }
@@ -194,18 +184,18 @@ export class AgenticTranslator {
         parameters,
         metadata: {
           convertedFrom: 'scheme',
-          originalExpression: expression
-        }
+          originalExpression: expression,
+        },
       };
 
       return {
         success: true,
-        result: primitive
+        result: primitive,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown conversion error'
+        error: error instanceof Error ? error.message : 'Unknown conversion error',
       };
     }
   }
@@ -215,9 +205,7 @@ export class AgenticTranslator {
    */
   agenticToScheme(primitive: AgenticPrimitive): TranslationResult<SchemeExpression> {
     try {
-      const children: SchemeExpression[] = [
-        { type: 'symbol', value: primitive.action }
-      ];
+      const children: SchemeExpression[] = [{ type: 'symbol', value: primitive.action }];
 
       // Add parameters as key-value pairs
       for (const [key, value] of Object.entries(primitive.parameters)) {
@@ -234,17 +222,17 @@ export class AgenticTranslator {
       const expression: SchemeExpression = {
         type: 'list',
         value: null,
-        children
+        children,
       };
 
       return {
         success: true,
-        result: expression
+        result: expression,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown conversion error'
+        error: error instanceof Error ? error.message : 'Unknown conversion error',
       };
     }
   }
@@ -256,12 +244,13 @@ export class AgenticTranslator {
     try {
       // Convert to hypergraph
       const hypergraphResult = this.agenticToHypergraph(original);
+
       if (!hypergraphResult.success || !hypergraphResult.result) {
         return {
           original,
           intermediate: null,
           final: null,
-          isValid: false
+          isValid: false,
         };
       }
 
@@ -269,12 +258,13 @@ export class AgenticTranslator {
 
       // Convert back to agentic primitive
       const backResult = this.hypergraphToAgentic(hypergraphAtoms);
+
       if (!backResult.success || !backResult.result) {
         return {
           original,
           intermediate: hypergraphAtoms,
           final: null,
-          isValid: false
+          isValid: false,
         };
       }
 
@@ -288,14 +278,14 @@ export class AgenticTranslator {
         intermediate: hypergraphAtoms,
         final,
         isValid: lossMetrics.totalLoss < 0.1, // Consider valid if loss < 10%
-        lossMetrics
+        lossMetrics,
       };
     } catch (error) {
       return {
         original,
         intermediate: null,
         final: null,
-        isValid: false
+        isValid: false,
       };
     }
   }
@@ -308,20 +298,16 @@ export class AgenticTranslator {
       atoms.push(keyNode);
 
       let valueNode;
+
       if (typeof value === 'object' && value !== null) {
         // Store complex objects as JSON strings
-        valueNode = this.atomSpace.createNode(
-          AtomType.CONCEPT_NODE,
-          JSON.stringify(value)
-        );
+        valueNode = this.atomSpace.createNode(AtomType.CONCEPT_NODE, JSON.stringify(value));
         (valueNode as Node).value = value;
       } else {
-        valueNode = this.atomSpace.createNode(
-          AtomType.CONCEPT_NODE,
-          String(value)
-        );
+        valueNode = this.atomSpace.createNode(AtomType.CONCEPT_NODE, String(value));
         (valueNode as Node).value = value;
       }
+
       atoms.push(valueNode);
     }
 
@@ -340,14 +326,14 @@ export class AgenticTranslator {
     atoms.push(goalNode);
 
     // Constraint nodes
-    const constraintNodes = context.constraints.map(constraint =>
-      this.atomSpace.createNode(AtomType.CONCEPT_NODE, constraint)
+    const constraintNodes = context.constraints.map((constraint) =>
+      this.atomSpace.createNode(AtomType.CONCEPT_NODE, constraint),
     );
     atoms.push(...constraintNodes);
 
     // Resource nodes
-    const resourceNodes = context.resources.map(resource =>
-      this.atomSpace.createNode(AtomType.CONCEPT_NODE, resource)
+    const resourceNodes = context.resources.map((resource) =>
+      this.atomSpace.createNode(AtomType.CONCEPT_NODE, resource),
     );
     atoms.push(...resourceNodes);
 
@@ -364,12 +350,13 @@ export class AgenticTranslator {
 
         const key = keyAtom.name || `param_${i / 2}`;
         let value = valueAtom.value !== undefined ? valueAtom.value : valueAtom.name;
-        
+
         // Handle complex parameter types
         if (typeof value === 'string') {
           // Try to parse as JSON for complex structures
           try {
             const parsed = JSON.parse(value);
+
             if (typeof parsed === 'object') {
               value = parsed;
             }
@@ -394,12 +381,13 @@ export class AgenticTranslator {
       agent: 'unknown-agent',
       goal: 'unknown-goal',
       constraints: [],
-      resources: []
+      resources: [],
     };
 
     if (contextAtoms.length > 0 && contextAtoms[0].name) {
       context.agent = contextAtoms[0].name;
     }
+
     if (contextAtoms.length > 1 && contextAtoms[1].name) {
       context.goal = contextAtoms[1].name;
     }
@@ -435,7 +423,7 @@ export class AgenticTranslator {
       case 'symbol':
         return String(expr.value);
       case 'list':
-        return expr.children?.map(child => this.schemeExpressionToValue(child)) || [];
+        return expr.children?.map((child) => this.schemeExpressionToValue(child)) || [];
       default:
         return expr.value;
     }
@@ -450,7 +438,7 @@ export class AgenticTranslator {
       return {
         type: 'list',
         value: null,
-        children: value.map(item => this.valueToSchemeExpression(item))
+        children: value.map((item) => this.valueToSchemeExpression(item)),
       };
     } else {
       return { type: 'string', value: String(value) };
@@ -462,7 +450,7 @@ export class AgenticTranslator {
       { type: 'symbol', value: 'agent' },
       { type: 'string', value: context.agent },
       { type: 'symbol', value: 'goal' },
-      { type: 'string', value: context.goal }
+      { type: 'string', value: context.goal },
     ];
 
     if (context.constraints.length > 0) {
@@ -470,7 +458,7 @@ export class AgenticTranslator {
       children.push({
         type: 'list',
         value: null,
-        children: context.constraints.map(c => ({ type: 'string', value: c }))
+        children: context.constraints.map((c) => ({ type: 'string', value: c })),
       });
     }
 
@@ -479,14 +467,14 @@ export class AgenticTranslator {
       children.push({
         type: 'list',
         value: null,
-        children: context.resources.map(r => ({ type: 'string', value: r }))
+        children: context.resources.map((r) => ({ type: 'string', value: r })),
       });
     }
 
     return {
       type: 'list',
       value: null,
-      children
+      children,
     };
   }
 
@@ -502,19 +490,20 @@ export class AgenticTranslator {
     // Check parameter preservation
     const originalParamKeys = Object.keys(original.parameters);
     const reconstructedParamKeys = Object.keys(reconstructed.parameters);
-    
-    const missingParams = originalParamKeys.filter(key => !(key in reconstructed.parameters));
-    const extraParams = reconstructedParamKeys.filter(key => !(key in original.parameters));
-    
+
+    const missingParams = originalParamKeys.filter((key) => !(key in reconstructed.parameters));
+    const extraParams = reconstructedParamKeys.filter((key) => !(key in original.parameters));
+
     structuralLoss += (missingParams.length + extraParams.length) / Math.max(originalParamKeys.length, 1);
 
     // Check parameter value preservation with more lenient comparison
     let changedValues = 0;
+
     for (const key of originalParamKeys) {
       if (key in reconstructed.parameters) {
         const originalValue = original.parameters[key];
         const reconstructedValue = reconstructed.parameters[key];
-        
+
         // More flexible comparison for complex types
         if (typeof originalValue === 'object' && typeof reconstructedValue === 'object') {
           try {
@@ -540,6 +529,7 @@ export class AgenticTranslator {
       if (original.context.agent !== reconstructed.context.agent) {
         semanticLoss += 0.05; // Reduced penalty
       }
+
       if (original.context.goal !== reconstructed.context.goal) {
         semanticLoss += 0.05; // Reduced penalty
       }
@@ -548,12 +538,13 @@ export class AgenticTranslator {
     // Normalize losses
     structuralLoss = Math.min(1, structuralLoss);
     semanticLoss = Math.min(1, semanticLoss);
+
     const totalLoss = (structuralLoss + semanticLoss) / 2;
 
     return {
       structuralLoss,
       semanticLoss,
-      totalLoss
+      totalLoss,
     };
   }
 }

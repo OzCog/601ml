@@ -24,7 +24,7 @@ describe('SchemeAdapter', () => {
       expect(result.success).toBe(true);
       expect(result.result).toEqual({
         type: 'symbol',
-        value: 'hello'
+        value: 'hello',
       });
     });
 
@@ -33,7 +33,7 @@ describe('SchemeAdapter', () => {
       expect(result.success).toBe(true);
       expect(result.result).toEqual({
         type: 'number',
-        value: 42
+        value: 42,
       });
     });
 
@@ -42,7 +42,7 @@ describe('SchemeAdapter', () => {
       expect(result.success).toBe(true);
       expect(result.result).toEqual({
         type: 'string',
-        value: 'hello world'
+        value: 'hello world',
       });
     });
 
@@ -55,8 +55,8 @@ describe('SchemeAdapter', () => {
         children: [
           { type: 'symbol', value: '+' },
           { type: 'number', value: 1 },
-          { type: 'number', value: 2 }
-        ]
+          { type: 'number', value: 2 },
+        ],
       });
     });
 
@@ -75,7 +75,7 @@ describe('SchemeAdapter', () => {
       expect(result.result).toEqual({
         type: 'list',
         value: null,
-        children: []
+        children: [],
       });
     });
 
@@ -97,13 +97,13 @@ describe('SchemeAdapter', () => {
     it('should convert simple symbols to concept nodes', () => {
       const expression: SchemeExpression = {
         type: 'symbol',
-        value: 'human'
+        value: 'human',
       };
 
       const result = adapter.schemeToAtoms(expression);
       expect(result.success).toBe(true);
       expect(result.result).toHaveLength(1);
-      
+
       const atom = result.result![0];
       expect(atom.type).toBe(AtomType.CONCEPT_NODE);
       expect(atom.name).toBe('human');
@@ -112,13 +112,13 @@ describe('SchemeAdapter', () => {
     it('should convert numbers with preserved values', () => {
       const expression: SchemeExpression = {
         type: 'number',
-        value: 42
+        value: 42,
       };
 
       const result = adapter.schemeToAtoms(expression);
       expect(result.success).toBe(true);
       expect(result.result).toHaveLength(1);
-      
+
       const atom = result.result![0];
       expect(atom.type).toBe(AtomType.CONCEPT_NODE);
       expect((atom as any).value).toBe(42);
@@ -130,16 +130,16 @@ describe('SchemeAdapter', () => {
         value: null,
         children: [
           { type: 'symbol', value: 'animal' },
-          { type: 'symbol', value: 'dog' }
-        ]
+          { type: 'symbol', value: 'dog' },
+        ],
       };
 
       const result = adapter.schemeToAtoms(expression);
       expect(result.success).toBe(true);
       expect(result.result!.length).toBeGreaterThan(2); // Multiple atoms created
-      
+
       // Should create nodes for symbols and a link
-      const linkAtoms = result.result!.filter(atom => 'outgoing' in atom);
+      const linkAtoms = result.result!.filter((atom) => 'outgoing' in atom);
       expect(linkAtoms).toHaveLength(1);
       expect(linkAtoms[0].type).toBe(AtomType.LIST_LINK);
     });
@@ -150,19 +150,19 @@ describe('SchemeAdapter', () => {
         value: null,
         children: [
           { type: 'symbol', value: 'lambda' },
-          { 
-            type: 'list', 
-            value: null, 
-            children: [{ type: 'symbol', value: 'x' }] 
+          {
+            type: 'list',
+            value: null,
+            children: [{ type: 'symbol', value: 'x' }],
           },
-          { type: 'symbol', value: 'x' }
-        ]
+          { type: 'symbol', value: 'x' },
+        ],
       };
 
       const result = adapter.schemeToAtoms(expression);
       expect(result.success).toBe(true);
-      
-      const lambdaLinks = result.result!.filter(atom => atom.type === AtomType.LAMBDA_LINK);
+
+      const lambdaLinks = result.result!.filter((atom) => atom.type === AtomType.LAMBDA_LINK);
       expect(lambdaLinks).toHaveLength(1);
     });
 
@@ -173,14 +173,14 @@ describe('SchemeAdapter', () => {
         children: [
           { type: 'symbol', value: 'inheritance' },
           { type: 'symbol', value: 'dog' },
-          { type: 'symbol', value: 'animal' }
-        ]
+          { type: 'symbol', value: 'animal' },
+        ],
       };
 
       const result = adapter.schemeToAtoms(expression);
       expect(result.success).toBe(true);
-      
-      const inheritanceLinks = result.result!.filter(atom => atom.type === AtomType.INHERITANCE_LINK);
+
+      const inheritanceLinks = result.result!.filter((atom) => atom.type === AtomType.INHERITANCE_LINK);
       expect(inheritanceLinks).toHaveLength(1);
     });
   });
@@ -188,24 +188,24 @@ describe('SchemeAdapter', () => {
   describe('Atoms to Scheme conversion', () => {
     it('should convert concept nodes back to symbols', () => {
       const node = atomSpace.createNode(AtomType.CONCEPT_NODE, 'human');
-      
+
       const result = adapter.atomsToScheme([node]);
       expect(result.success).toBe(true);
       expect(result.result).toEqual({
         type: 'symbol',
-        value: 'human'
+        value: 'human',
       });
     });
 
     it('should convert number nodes with preserved values', () => {
       const node = atomSpace.createNode(AtomType.CONCEPT_NODE, '42');
       (node as any).value = 42;
-      
+
       const result = adapter.atomsToScheme([node]);
       expect(result.success).toBe(true);
       expect(result.result).toEqual({
         type: 'number',
-        value: 42
+        value: 42,
       });
     });
 
@@ -213,7 +213,7 @@ describe('SchemeAdapter', () => {
       const node1 = atomSpace.createNode(AtomType.CONCEPT_NODE, 'animal');
       const node2 = atomSpace.createNode(AtomType.CONCEPT_NODE, 'dog');
       const link = atomSpace.createLink(AtomType.LIST_LINK, [node1, node2]);
-      
+
       const result = adapter.atomsToScheme([node1, node2, link]);
       expect(result.success).toBe(true);
       expect(result.result?.type).toBe('list');
@@ -225,7 +225,7 @@ describe('SchemeAdapter', () => {
       const bodyNode = atomSpace.createNode(AtomType.CONCEPT_NODE, 'x');
       const paramList = atomSpace.createLink(AtomType.LIST_LINK, [varNode]);
       const lambdaLink = atomSpace.createLink(AtomType.LAMBDA_LINK, [paramList, bodyNode]);
-      
+
       const result = adapter.atomsToScheme([varNode, bodyNode, paramList, lambdaLink]);
       expect(result.success).toBe(true);
       expect(result.result?.type).toBe('list');
@@ -236,19 +236,19 @@ describe('SchemeAdapter', () => {
   describe('Round-trip translation', () => {
     it('should preserve simple expressions in round-trip', () => {
       const originalScheme = '(+ 1 2)';
-      
+
       // Parse to expression
       const parseResult = adapter.parseScheme(originalScheme);
       expect(parseResult.success).toBe(true);
-      
+
       // Convert to atoms
       const atomsResult = adapter.schemeToAtoms(parseResult.result!);
       expect(atomsResult.success).toBe(true);
-      
+
       // Convert back to expression
       const backResult = adapter.atomsToScheme(atomsResult.result!);
       expect(backResult.success).toBe(true);
-      
+
       // Convert back to string and compare semantics
       const finalString = adapter.expressionToString(backResult.result!);
       expect(finalString).toContain('+');
@@ -258,32 +258,32 @@ describe('SchemeAdapter', () => {
 
     it('should preserve lambda expressions in round-trip', () => {
       const originalScheme = '(lambda (x) (+ x 1))';
-      
+
       const parseResult = adapter.parseScheme(originalScheme);
       expect(parseResult.success).toBe(true);
-      
+
       const atomsResult = adapter.schemeToAtoms(parseResult.result!);
       expect(atomsResult.success).toBe(true);
-      
+
       const backResult = adapter.atomsToScheme(atomsResult.result!);
       expect(backResult.success).toBe(true);
-      
+
       const finalString = adapter.expressionToString(backResult.result!);
       expect(finalString).toContain('lambda');
     });
 
     it('should preserve nested structures in round-trip', () => {
       const originalScheme = '(if (> x 0) "positive" "negative")';
-      
+
       const parseResult = adapter.parseScheme(originalScheme);
       expect(parseResult.success).toBe(true);
-      
+
       const atomsResult = adapter.schemeToAtoms(parseResult.result!);
       expect(atomsResult.success).toBe(true);
-      
+
       const backResult = adapter.atomsToScheme(atomsResult.result!);
       expect(backResult.success).toBe(true);
-      
+
       // Verify structure is preserved
       expect(backResult.result?.type).toBe('list');
       expect(backResult.result?.children).toHaveLength(4);
@@ -313,8 +313,8 @@ describe('SchemeAdapter', () => {
         children: [
           { type: 'symbol', value: '+' },
           { type: 'number', value: 1 },
-          { type: 'number', value: 2 }
-        ]
+          { type: 'number', value: 2 },
+        ],
       };
       expect(adapter.expressionToString(expr)).toBe('(+ 1 2)');
     });
@@ -323,7 +323,7 @@ describe('SchemeAdapter', () => {
       const expr: SchemeExpression = {
         type: 'list',
         value: null,
-        children: []
+        children: [],
       };
       expect(adapter.expressionToString(expr)).toBe('()');
     });
@@ -332,22 +332,22 @@ describe('SchemeAdapter', () => {
   describe('Parse and convert integration', () => {
     it('should parse and convert in single operation', () => {
       const schemeString = '(inheritance dog animal)';
-      
+
       const result = adapter.parseAndConvert(schemeString);
       expect(result.success).toBe(true);
       expect(result.result!.length).toBeGreaterThan(0);
-      
-      const inheritanceLinks = result.result!.filter(atom => atom.type === AtomType.INHERITANCE_LINK);
+
+      const inheritanceLinks = result.result!.filter((atom) => atom.type === AtomType.INHERITANCE_LINK);
       expect(inheritanceLinks).toHaveLength(1);
     });
 
     it('should handle complex expressions in single operation', () => {
       const schemeString = '(evaluation (predicate "likes") (list (concept "Alice") (concept "Bob")))';
-      
+
       const result = adapter.parseAndConvert(schemeString);
       expect(result.success).toBe(true);
-      
-      const evaluationLinks = result.result!.filter(atom => atom.type === AtomType.EVALUATION_LINK);
+
+      const evaluationLinks = result.result!.filter((atom) => atom.type === AtomType.EVALUATION_LINK);
       expect(evaluationLinks).toHaveLength(1);
     });
   });
@@ -374,27 +374,27 @@ describe('SchemeAdapter', () => {
   describe('Real data tests with cognitive grammar', () => {
     it('should handle cognitive action expressions', () => {
       const cognitiveScheme = '(perform-action "navigate" (target "kitchen") (method "walking"))';
-      
+
       const parseResult = adapter.parseScheme(cognitiveScheme);
       expect(parseResult.success).toBe(true);
-      
+
       const atomsResult = adapter.schemeToAtoms(parseResult.result!);
       expect(atomsResult.success).toBe(true);
-      
+
       // Verify proper atom creation for cognitive actions
-      const conceptNodes = atomsResult.result!.filter(atom => atom.type === AtomType.CONCEPT_NODE);
+      const conceptNodes = atomsResult.result!.filter((atom) => atom.type === AtomType.CONCEPT_NODE);
       expect(conceptNodes.length).toBeGreaterThan(0);
-      
-      const listLinks = atomsResult.result!.filter(atom => atom.type === AtomType.LIST_LINK);
+
+      const listLinks = atomsResult.result!.filter((atom) => atom.type === AtomType.LIST_LINK);
       expect(listLinks.length).toBeGreaterThan(0);
     });
 
     it('should handle goal-oriented expressions', () => {
       const goalScheme = '(achieve-goal "prepare-meal" (ingredients ("rice" "vegetables")) (time-limit 30))';
-      
+
       const result = adapter.parseAndConvert(goalScheme);
       expect(result.success).toBe(true);
-      
+
       // Verify round-trip preservation
       const backResult = adapter.atomsToScheme(result.result!);
       expect(backResult.success).toBe(true);
@@ -408,13 +408,13 @@ describe('SchemeAdapter', () => {
           (action "turn-on-fan")
           (action "maintain-current-state"))
       `;
-      
+
       const parseResult = adapter.parseScheme(conditionalScheme);
       expect(parseResult.success).toBe(true);
-      
+
       const atomsResult = adapter.schemeToAtoms(parseResult.result!);
       expect(atomsResult.success).toBe(true);
-      
+
       // Should create a complex structure with multiple nested elements
       expect(atomsResult.result!.length).toBeGreaterThan(5);
     });
